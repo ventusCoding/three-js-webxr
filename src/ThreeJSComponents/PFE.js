@@ -4,17 +4,18 @@ import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerM
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { LoadingBar } from "./LoadingBar.js";
-import CANNON from "cannon";
+// import CANNON from "cannon";
 import { threeToCannon, ShapeType } from "three-to-cannon";
+import { JoyStick } from "./Toon3D.js";
 
 class PFE {
   constructor(app) {
     const container = document.createElement("div");
     app.appendChild(container);
 
-    this.world = new CANNON.World({
-      gravity: new CANNON.Vec3(0, 0, -9.82), // m/s²
-    });
+    // this.world = new CANNON.World({
+    //   gravity: new CANNON.Vec3(0, 0, -9.82), // m/s²
+    // });
 
     this.camera = new THREE.PerspectiveCamera(
       60,
@@ -24,15 +25,14 @@ class PFE {
     );
     this.camera.position.set(0, 1.6, 0);
 
-    // this.dolly = new THREE.Object3D();
+    this.dolly = new THREE.Object3D();
 
-    this.dolly = new CANNON.Body({
-      mass: 5, // kg
-      position: new CANNON.Vec3(0, 0, 10), // m
-      shape: new CANNON.Sphere(1)
-   });
-   this.world.addBody(this.dolly);
-
+    // this.dolly = new CANNON.Body({
+    //   mass: 5, // kg
+    //   position: new CANNON.Vec3(0, 0, 10), // m
+    //   shape: new CANNON.Sphere(1),
+    // });
+    // this.world.addBody(this.dolly);
 
     this.dolly.position.set(0, 0, 10);
     this.dolly.add(this.camera);
@@ -59,9 +59,12 @@ class PFE {
     this.workingQuaternion = new THREE.Quaternion();
     this.raycaster = new THREE.Raycaster();
 
-    this.loadingBar = new LoadingBar();
+    //TODO: RAJA3 HEDHOM
+    // this.loadingBar = new LoadingBar();
+    // this.loadModel();
 
-    this.loadModel();
+    this.setupXR();
+    //TODO: RAJA3 HEDHOM
     this.initScene();
 
     const self = this;
@@ -133,16 +136,16 @@ class PFE {
       function (fbx) {
         // fbx.scale.set(self.dolly.scale.x * 0.1,self.dolly.scale.y * 0.1,self.dolly.scale.z * 0.1);
 
-        const result = threeToCannon(fbx, { type: ShapeType.MESH });
+        // const result = threeToCannon(fbx, { type: ShapeType.MESH });
 
-        var sphereBody = new CANNON.Body({
-          mass: 5, // kg
-          position: new CANNON.Vec3(0, 0, 10), // m
-          shape: result.shape,
-        });
-        self.world.addBody(sphereBody);
+        // var sphereBody = new CANNON.Body({
+        //   mass: 5, // kg
+        //   position: new CANNON.Vec3(0, 0, 10), // m
+        //   shape: result.shape,
+        // });
+        // self.world.addBody(sphereBody);
 
-        console.log(fbx.scale);
+        // console.log(fbx.scale);
 
         fbx.rotation.z = (90 * Math.PI) / 180;
         fbx.rotation.x = (-90 * Math.PI) / 180;
@@ -168,27 +171,45 @@ class PFE {
     );
   }
 
+  onMove(forward, turn) {
+    if (this.dolly) {
+      this.dolly.userData.forward = forward;
+      this.dolly.userData.turn = -turn;
+    }
+  }
+
   setupXR() {
     this.renderer.xr.enabled = true;
 
-    const btn = new VRBTN(this.renderer);
-
     const self = this;
+    console.log("TESTaaa");
+    function vrStatus(available) {
+      console.log("TEST");
+      if (available) {
+        console.log("VR is available");
+        function onSelectStart(event) {
+          this.userData.selectPressed = true;
+        }
 
-    function onSelectStart(event) {
-      this.userData.selectPressed = true;
+        function onSelectEnd(event) {
+          this.userData.selectPressed = false;
+        }
+
+        self.controllers = self.buildControllers(self.dolly);
+
+        self.controllers.forEach((controller) => {
+          controller.addEventListener("selectstart", onSelectStart);
+          controller.addEventListener("selectend", onSelectEnd);
+        });
+      } else {
+        console.log("VR not available");
+        self.joystick = new JoyStick({
+          onMove: self.onMove.bind(self),
+        });
+      }
     }
 
-    function onSelectEnd(event) {
-      this.userData.selectPressed = false;
-    }
-
-    this.controllers = this.buildControllers(this.dolly);
-
-    this.controllers.forEach((controller) => {
-      controller.addEventListener("selectstart", onSelectStart);
-      controller.addEventListener("selectend", onSelectEnd);
-    });
+    const btn = new VRBTN(this.renderer, { vrStatus });
 
     this.renderer.setAnimationLoop(this.render.bind(this));
   }
@@ -227,14 +248,25 @@ class PFE {
     pos.y += 1;
 
     let dir = new THREE.Vector3();
+
     //Store original dolly rotation
     const quaternion = this.dolly.quaternion.clone();
-    //Get rotation for movement from the headset pose
-    this.dolly.quaternion.copy(
-      this.dummyCam.getWorldQuaternion(this.workingQuaternion)
-    );
-    this.dolly.getWorldDirection(dir);
-    dir.negate();
+
+    if (this.joystick === undefined) {
+      //Get rotation for movement from the headset pose
+      this.dolly.quaternion.copy(
+        this.dummyCam.getWorldQuaternion(this.workingQuaternion)
+      );
+      this.dolly.getWorldDirection(dir);
+      dir.negate();
+    } else {
+      this.dolly.getWorldDirection(dir);
+      if (this.dolly.userData.forward > 0) {
+        dir.negate();
+      } else {
+        dt = -dt;
+      }
+    }
 
     this.dolly.translateZ(-dt * speed);
     pos = this.dolly.getWorldPosition(this.origin);
@@ -254,11 +286,23 @@ class PFE {
   render(timestamp, frame) {
     const dt = this.clock.getDelta();
 
-    this.world.fixedStep();
+    // this.world.fixedStep();
+
+    let moved = false;
 
     if (this.renderer.xr.isPresenting) {
       if (this.selectPressed) {
         this.moveDolly(dt);
+      }
+    }
+
+    if (this.joystick !== undefined) {
+      if (this.dolly.userData.forward !== undefined) {
+        if (this.dolly.userData.forward != 0) {
+          this.moveDolly(dt);
+          moved = true;
+        }
+        this.dolly.rotateY(this.dolly.userData.turn * dt);
       }
     }
 
