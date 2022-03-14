@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     if (container) {
-      let loader = new Controls(container.current)
+      let loader = new PFE(container.current)
     }
   },[container])
 
