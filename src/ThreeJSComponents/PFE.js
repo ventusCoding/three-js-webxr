@@ -7,6 +7,7 @@ import { LoadingBar } from "./LoadingBar.js";
 // import CANNON from "cannon";
 import { threeToCannon, ShapeType } from "three-to-cannon";
 import { JoyStick } from "./Toon3D.js";
+import { CanvasUI } from "./CanvasUI.js";
 
 class PFE {
   constructor(app) {
@@ -66,6 +67,7 @@ class PFE {
     this.setupXR();
     //TODO: RAJA3 HEDHOM
     this.initScene();
+    this.createUI();
 
     const self = this;
   }
@@ -94,6 +96,11 @@ class PFE {
     //     console.log(err);
     //     console.error( 'An error occurred setting the environment');
     // } );
+  }
+
+  createUI() {
+    this.ui = new CanvasUI();
+    this.ui.updateElement("body", "Hello World");
   }
 
   initScene() {
@@ -172,6 +179,7 @@ class PFE {
   }
 
   onMove(forward, turn) {
+    console.log(forward, turn);
     if (this.dolly) {
       this.dolly.userData.forward = forward;
       this.dolly.userData.turn = -turn;
@@ -200,6 +208,8 @@ class PFE {
         self.controllers.forEach((controller) => {
           controller.addEventListener("selectstart", onSelectStart);
           controller.addEventListener("selectend", onSelectEnd);
+          
+
         });
       } else {
         console.log("VR not available");
@@ -209,7 +219,19 @@ class PFE {
       }
     }
 
-    const btn = new VRBTN(this.renderer, { vrStatus });
+    function onSessionStart() {
+      self.ui.mesh.position.set(0, 1.5, 9);
+      self.camera.attach(self.ui.mesh);
+    }
+
+    function onSessionEnd() {
+      self.camera.remove(self.ui.mesh);
+    }
+
+    const btn = new VRBTN(
+      this.renderer,
+      { vrStatus,onSessionStart, onSessionEnd },
+    );
 
     this.renderer.setAnimationLoop(this.render.bind(this));
   }
@@ -291,6 +313,9 @@ class PFE {
     let moved = false;
 
     if (this.renderer.xr.isPresenting) {
+      this.ui.update();
+      // this.ui.updateElement("body", String(JSON.stringify(this.dolly.position)) );
+      console.log(this.dolly.position);
       if (this.selectPressed) {
         this.moveDolly(dt);
       }

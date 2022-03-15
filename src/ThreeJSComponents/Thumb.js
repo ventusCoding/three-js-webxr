@@ -7,15 +7,16 @@ import { LoadingBar } from "./LoadingBar.js";
 // import CANNON from "cannon";
 import { threeToCannon, ShapeType } from "three-to-cannon";
 import { JoyStick } from "./Toon3D.js";
+import { CanvasUI } from "./CanvasUI.js";
 import {
   Constants as MotionControllerConstants,
   fetchProfile,
   MotionController,
-} from "three/examples/jsm/libs/motion-controllers.module.js";
+} from "@webxr-input-profiles/motion-controllers";
 
-
-const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
-const DEFAULT_PROFILE = 'generic-trigger';
+const DEFAULT_PROFILES_PATH =
+  "https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles";
+const DEFAULT_PROFILE = "generic-trigger";
 
 class Thumb {
   constructor(app) {
@@ -75,6 +76,7 @@ class Thumb {
     this.setupXR();
     //TODO: RAJA3 HEDHOM
     this.initScene();
+    this.createUI();
 
     const self = this;
   }
@@ -103,6 +105,11 @@ class Thumb {
     //     console.log(err);
     //     console.error( 'An error occurred setting the environment');
     // } );
+  }
+
+  createUI() {
+    this.ui = new CanvasUI();
+    this.ui.updateElement("body", "Hello World");
   }
 
   initScene() {
@@ -181,9 +188,71 @@ class Thumb {
   }
 
   onMove(forward, turn) {
+    console.log(forward, turn);
+
     if (this.dolly) {
-      this.dolly.userData.forward = forward;
-      this.dolly.userData.turn = -turn;
+      // this.ui.updateElement("body", `forward: ${forward} \n turn: ${turn} ` );
+      try {
+        this.dolly.userData.forward = forward;
+        this.dolly.userData.turn = -turn;
+      } catch (e) {
+        this.ui.updateElement("body", `error: ${e}`);
+      }
+    }
+  }
+
+  createButtonStates(components) {
+    const buttonStates = {};
+    this.gamepadIndices = components;
+
+    Object.keys(components).forEach((key) => {
+      if (key.indexOf("touchpad") != -1 || key.indexOf("thumbstick") != -1) {
+        buttonStates[key] = { button: 0, xAxis: 0, yAxis: 0 };
+      } else {
+        buttonStates[key] = 0;
+      }
+    });
+
+    this.buttonStates = buttonStates;
+  }
+
+  updateGamepadState() {
+    const session = this.renderer.xr.getSession();
+
+    const inputSource = session.inputSources[0];
+
+    if (
+      inputSource &&
+      inputSource.gamepad &&
+      this.gamepadIndices &&
+      this.ui &&
+      this.buttonStates
+    ) {
+      const gamepad = inputSource.gamepad;
+      try {
+        Object.entries(this.buttonStates).forEach(([key, value]) => {
+          const buttonIndex = this.gamepadIndices[key].button;
+          if (
+            key.indexOf("touchpad") != -1 ||
+            key.indexOf("thumbstick") != -1
+          ) {
+            const xAxisIndex = this.gamepadIndices[key].xAxis;
+            const yAxisIndex = this.gamepadIndices[key].yAxis;
+            this.buttonStates[key].button = gamepad.buttons[buttonIndex].value;
+            this.buttonStates[key].xAxis = gamepad.axes[xAxisIndex].toFixed(2);
+            this.buttonStates[key].yAxis = gamepad.axes[yAxisIndex].toFixed(2);
+            this.onMove(
+              -this.buttonStates[key].yAxis,
+              this.buttonStates[key].xAxis
+            );
+            this.ui.updateElement("body", `x: ${gamepad.axes[xAxisIndex].toFixed(2)} \n y: ${gamepad.axes[yAxisIndex].toFixed(2)}` );
+          } else {
+            this.buttonStates[key] = gamepad.buttons[buttonIndex].value;
+          }
+        });
+      } catch (e) {
+        console.warn(e);
+      }
     }
   }
 
@@ -191,12 +260,35 @@ class Thumb {
     this.renderer.xr.enabled = true;
 
     const self = this;
-    console.log("TESTaaa");
-    function vrStatus(available) {
-      console.log("TEST");
 
+    function vrStatus(available) {
       if (available) {
-        console.log("VR is available");
+        console.log("available");
+        function onConnected(event) {
+          const info = {};
+
+          fetchProfile(event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(
+            ({ profile, assetPath }) => {
+              console.log(JSON.stringify(profile));
+
+              info.name = profile.profileId;
+              info.targetRayMode = event.data.targetRayMode;
+
+              Object.entries(profile.layouts).forEach(([key, layout]) => {
+                const components = {};
+                Object.values(layout.components).forEach((component) => {
+                  components[component.rootNodeName] = component.gamepadIndices;
+                });
+                info[key] = components;
+              });
+
+              self.createButtonStates(info.right);
+
+              console.log(JSON.stringify(info));
+            }
+          );
+        }
+
         function onSelectStart(event) {
           this.userData.selectPressed = true;
         }
@@ -205,77 +297,75 @@ class Thumb {
           this.userData.selectPressed = false;
         }
 
-        function onConnected( event ){
-            const info = {};
-            
-            fetchProfile( event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE ).then( ( { profile, assetPath } ) => {
-                console.log( JSON.stringify(profile));
-                
-                info.name = profile.profileId;
-                info.targetRayMode = event.data.targetRayMode;
+        const controller = self.renderer.xr.getController(0);
 
-                Object.entries( profile.layouts ).forEach( ( [key, layout] ) => {
-                    const components = {};
-                    Object.values( layout.components ).forEach( ( component ) => {
-                        components[component.rootNodeName] = component.gamepadIndices;
-                    });
-                    info[key] = components;
-                });
+        controller.addEventListener("connected", onConnected);
+        controller.addEventListener("selectstart", onSelectStart);
+        controller.addEventListener("selectend", onSelectEnd);
 
-                self.createButtonStates( info.right );
-                
-                console.log( JSON.stringify(info) );
+        const controller2 = self.renderer.xr.getController(1);
 
-            } );
-        }
+        controller2.addEventListener("connected", onConnected);
+        controller2.addEventListener("selectstart", onSelectStart);
+        controller2.addEventListener("selectend", onSelectEnd);
 
-        self.controllers = self.buildControllers(self.dolly);
+        const modelFactory = new XRControllerModelFactory();
 
-        self.controllers.forEach((controller) => {
-          controller.addEventListener("selectstart", onSelectStart);
-          controller.addEventListener("selectend", onSelectEnd);
-          controller.addEventListener( 'connected', onConnected );
-        });
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, -1),
+        ]);
+
+        const line = new THREE.Line(geometry);
+        line.scale.z = 0;
+
+        self.controllers = {};
+        self.controllers.right = self.buildController(0, line, modelFactory);
+        self.controllers.left = self.buildController(1, line, modelFactory);
       } else {
-        console.log("VR not available");
         self.joystick = new JoyStick({
           onMove: self.onMove.bind(self),
         });
       }
     }
 
-    const btn = new VRBTN(this.renderer, { vrStatus });
+    function onSessionStart() {
+      self.ui.mesh.position.set(0, 1.5, 9);
+      self.camera.attach(self.ui.mesh);
+    }
+
+    function onSessionEnd() {
+      self.camera.remove(self.ui.mesh);
+    }
+
+    const btn = new VRBTN(this.renderer, {
+      vrStatus,
+      onSessionStart,
+      onSessionEnd,
+    });
 
     this.renderer.setAnimationLoop(this.render.bind(this));
   }
 
-  buildControllers(parent = this.scene) {
-    const controllerModelFactory = new XRControllerModelFactory();
+  buildController(index, line, modelFactory) {
+    const controller = this.renderer.xr.getController(index);
 
-    const geometry = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, 0, -1),
-    ]);
+    controller.userData.selectPressed = false;
+    controller.userData.index = index;
 
-    const line = new THREE.Line(geometry);
-    line.scale.z = 0;
+    if (line) controller.add(line.clone());
 
-    const controllers = [];
+    this.dolly.add(controller);
 
-    for (let i = 0; i <= 1; i++) {
-      const controller = this.renderer.xr.getController(i);
-      controller.add(line.clone());
-      controller.userData.selectPressed = false;
-      parent.add(controller);
-      controllers.push(controller);
+    let grip;
 
-      const grip = this.renderer.xr.getControllerGrip(i);
-      grip.add(controllerModelFactory.createControllerModel(grip));
-      parent.add(grip);
-
+    if (modelFactory) {
+      grip = this.renderer.xr.getControllerGrip(index);
+      grip.add(modelFactory.createControllerModel(grip));
+      this.dolly.add(grip);
     }
 
-    return controllers;
+    return { controller, grip };
   }
 
   moveDolly(dt) {
@@ -288,13 +378,36 @@ class Thumb {
     //Store original dolly rotation
     const quaternion = this.dolly.quaternion.clone();
 
+    //**************** */
+
+    // if (this.joystick === undefined) {
+    //   //Get rotation for movement from the headset pose
+    //   this.dolly.quaternion.copy(
+    //     this.dummyCam.getWorldQuaternion(this.workingQuaternion)
+    //   );
+    //   this.dolly.getWorldDirection(dir);
+    //   dir.negate();
+    // } else {
+    //   this.dolly.getWorldDirection(dir);
+    //   if (this.dolly.userData.forward > 0) {
+    //     dir.negate();
+    //   } else {
+    //     dt = -dt;
+    //   }
+    // }
+
+
     if (this.joystick === undefined) {
       //Get rotation for movement from the headset pose
       this.dolly.quaternion.copy(
         this.dummyCam.getWorldQuaternion(this.workingQuaternion)
       );
       this.dolly.getWorldDirection(dir);
-      dir.negate();
+      if (this.dolly.userData.forward > 0) {
+        dir.negate();
+      } else {
+        dt = -dt;
+      }
     } else {
       this.dolly.getWorldDirection(dir);
       if (this.dolly.userData.forward > 0) {
@@ -304,6 +417,8 @@ class Thumb {
       }
     }
 
+    //********************** */
+
     this.dolly.translateZ(-dt * speed);
     pos = this.dolly.getWorldPosition(this.origin);
 
@@ -312,56 +427,14 @@ class Thumb {
   }
 
   get selectPressed() {
+    // console.log(this.renderer.xr.getController(0).userData.selectPressed);
+    console.log(this.renderer.xr.getController(1).userData.selectPressed);
     return (
       this.controllers !== undefined &&
-      (this.controllers[0].userData.selectPressed ||
-        this.controllers[1].userData.selectPressed)
+      (this.renderer.xr.getController(0).userData.selectPressed ||
+        this.renderer.xr.getController(1).userData.selectPressed)
     );
   }
-
-  updateGamepadState(){
-    const session = this.renderer.xr.getSession();
-    const inputSource = session.inputSources[0];
-    if (inputSource && inputSource.gamepad && this.gamepadIndices && this.buttonStates){
-        const gamepad = inputSource.gamepad;
-        try{
-            Object.entries( this.buttonStates ).forEach( ( [ key, value ] ) => {
-                const buttonIndex = this.gamepadIndices[key].button;
-                if ( key.indexOf('touchpad')!=-1 || key.indexOf('thumbstick')!=-1){
-                    
-                    const xAxisIndex = this.gamepadIndices[key].xAxis;
-                    const yAxisIndex = this.gamepadIndices[key].yAxis;
-                    this.buttonStates[key].button = gamepad.buttons[buttonIndex].value; 
-                    this.buttonStates[key].xAxis = gamepad.axes[xAxisIndex].toFixed(2); 
-                    this.buttonStates[key].yAxis = gamepad.axes[yAxisIndex].toFixed(2); 
-                    this.onMove(this.buttonStates[key].xAxis, this.buttonStates[key].yAxis);
-                }else{
-                    this.buttonStates[key] = gamepad.buttons[buttonIndex].value;
-                }
-            
-            });
-        }catch(e){
-            console.log(e);
-        }
-    }
-}
-
-
-  createButtonStates(components){
-
-    const buttonStates = {};
-    this.gamepadIndices = components;
-    
-    Object.keys( components ).forEach( (key) => {
-        if ( key.indexOf('touchpad')!=-1 || key.indexOf('thumbstick')!=-1){
-            buttonStates[key] = { button: 0, xAxis: 0, yAxis: 0 };
-        }else{
-            buttonStates[key] = 0; 
-        }
-    })
-    
-    this.buttonStates = buttonStates;
-}
 
   render(timestamp, frame) {
     const dt = this.clock.getDelta();
@@ -371,19 +444,23 @@ class Thumb {
     let moved = false;
 
     if (this.renderer.xr.isPresenting) {
+      // console.log(this.controllers[0].gamepad);
+      this.ui.update();
+      // this.ui.updateElement("body", String(JSON.stringify(this.controllers[0].gamepad)) );
+
       if (this.selectPressed) {
-        this.moveDolly(dt);
+        this.moveDolly(-dt);
       }
-      
 
-      if (this.elapsedTime===undefined) this.elapsedTime = 0;
+      if (this.elapsedTime === undefined) this.elapsedTime = 0;
       this.elapsedTime += dt;
-      if (this.elapsedTime > 0.3){
-          this.updateGamepadState();
-          this.elapsedTime = 0;
+      if (this.elapsedTime > 0.3) {
+        this.updateGamepadState();
+        this.elapsedTime = 0;
       }
-
     }
+
+    //*********************
 
     if (this.joystick !== undefined) {
       if (this.dolly.userData.forward !== undefined) {
@@ -394,6 +471,16 @@ class Thumb {
         this.dolly.rotateY(this.dolly.userData.turn * dt);
       }
     }
+
+    if (this.dolly.userData.forward !== undefined) {
+      if (this.dolly.userData.forward != 0) {
+        this.moveDolly(dt);
+        moved = true;
+      }
+      // this.dolly.translateX(this.dolly.userData.turn * -dt);
+    }
+
+    //*********************
 
     this.renderer.render(this.scene, this.camera);
   }

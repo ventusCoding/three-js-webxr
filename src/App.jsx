@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     if (container) {
-      let loader = new PFE(container.current)
+      let loader = new Thumb(container.current)
     }
   },[container])
 
