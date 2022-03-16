@@ -108,6 +108,61 @@ class Thumb {
     this.colliders = [];
   }
 
+  // loadGLTF() {
+  //   // const loader = new GLTFLoader().setPath("./");
+
+  //   const dracoLoader = new DRACOLoader();
+  //   dracoLoader.setDecoderPath(
+  //     "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/"
+  //   ); // use a full url path
+
+  //   const loader = new GLTFLoader().setPath("./");
+  //   loader.setDRACOLoader(dracoLoader);
+
+  //   const self = this;
+
+  //   // Load a glTF resource
+  //   loader.load(
+  //     // resource URL
+  //     "house.FBX",
+  //     // called when the resource is loaded
+  //     function (gltf) {
+  //       const college = gltf.scene.children[0];
+  //       console.log(gltf);
+  //       self.scene.add( college );
+
+  //       college.traverse(function (child) {
+  //           if (child.isMesh){
+  //               if (child.name.indexOf("PROXY")!=-1){
+  //                   child.material.visible = false;
+  //                   self.proxy = child;
+  //               }else if (child.material.name.indexOf('Glass')!=-1){
+  //                   child.material.opacity = 0.1;
+  //                   child.material.transparent = true;
+  //               }else if (child.material.name.indexOf("SkyBox")!=-1){
+  //                   const mat1 = child.material;
+  //                   const mat2 = new THREE.MeshBasicMaterial({map: mat1.map});
+  //                   child.material = mat2;
+  //                   mat1.dispose();
+  //               }
+  //           }
+  //       });
+
+
+  //     },
+  //     // called while loading is progressing
+  //     function (xhr) {
+  //       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  //     },
+  //     // called when loading has errors
+  //     function (error) {
+  //       console.log(error);
+  //       console.log("An error happened");
+  //     }
+  //   );
+  //   self.setupVR();
+  // }
+
   loadModel() {
     const loader = new FBXLoader().setPath("./");
 
@@ -118,6 +173,21 @@ class Thumb {
       "model1.fbx",
       // called when the resource is loaded
       function (fbx) {
+        fbx.traverse((child) => {
+          
+
+          
+          if (child.isMesh) {
+            const string = child.name.toLowerCase();
+            const substring = "floor";
+            
+            if(string.includes(substring.toLowerCase())){
+              child.visible = false
+              console.log(string);
+            }
+          }
+
+        });
         // fbx.scale.set(self.dolly.scale.x * 0.1,self.dolly.scale.y * 0.1,self.dolly.scale.z * 0.1);
 
         // const result = threeToCannon(fbx, { type: ShapeType.MESH });
@@ -281,7 +351,7 @@ class Thumb {
         ]);
 
         const line = new THREE.Line(geometry);
-        line.scale.z = 10;
+        // line.scale.z = 10;
 
         self.controllers = {};
         self.controllers.right = self.buildController(0, line, modelFactory);
