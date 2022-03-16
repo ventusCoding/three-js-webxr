@@ -23,10 +23,6 @@ class Thumb {
     const container = document.createElement("div");
     app.appendChild(container);
 
-    // this.world = new CANNON.World({
-    //   gravity: new CANNON.Vec3(0, 0, -9.82), // m/s²
-    // });
-
     this.camera = new THREE.PerspectiveCamera(
       60,
       window.innerWidth / window.innerHeight,
@@ -36,13 +32,6 @@ class Thumb {
     this.camera.position.set(0, 1.6, 0);
 
     this.dolly = new THREE.Object3D();
-
-    // this.dolly = new CANNON.Body({
-    //   mass: 5, // kg
-    //   position: new CANNON.Vec3(0, 0, 10), // m
-    //   shape: new CANNON.Sphere(1),
-    // });
-    // this.world.addBody(this.dolly);
 
     this.dolly.position.set(0, 0, 10);
     this.dolly.add(this.camera);
@@ -60,7 +49,6 @@ class Thumb {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(this.renderer.domElement);
-    this.setEnvironment();
 
     this.clock = new THREE.Clock();
     this.up = new THREE.Vector3(0, 1, 0);
@@ -76,7 +64,7 @@ class Thumb {
     this.setupXR();
     //TODO: RAJA3 HEDHOM
     this.initScene();
-    this.createUI();
+    this.createDebugUI();
 
     const self = this;
   }
@@ -87,29 +75,9 @@ class Thumb {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  setEnvironment() {
-    const loader = new RGBELoader().setDataType(THREE.UnsignedByteType);
-    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
-    pmremGenerator.compileEquirectangularShader();
-
-    const self = this;
-
-    // loader.load( './venice_sunset_1k.hdr', ( texture ) => {
-    // //   const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-    // //   pmremGenerator.dispose();
-
-    // //   self.scene.environment = envMap;
-    // console.log('pass');
-
-    // }, undefined, (err)=>{
-    //     console.log(err);
-    //     console.error( 'An error occurred setting the environment');
-    // } );
-  }
-
-  createUI() {
-    this.ui = new CanvasUI();
-    this.ui.updateElement("body", "Hello World");
+  createDebugUI() {
+    this.debugui = new CanvasUI();
+    this.debugui.updateElement("body", "Hello World");
   }
 
   initScene() {
@@ -188,15 +156,12 @@ class Thumb {
   }
 
   onMove(forward, turn) {
-    console.log(forward, turn);
-
     if (this.dolly) {
-      // this.ui.updateElement("body", `forward: ${forward} \n turn: ${turn} ` );
       try {
         this.dolly.userData.forward = forward;
         this.dolly.userData.turn = -turn;
       } catch (e) {
-        this.ui.updateElement("body", `error: ${e}`);
+        this.debugui.updateElement("body", `error: ${e}`);
       }
     }
   }
@@ -225,7 +190,6 @@ class Thumb {
       inputSource &&
       inputSource.gamepad &&
       this.gamepadIndices &&
-      this.ui &&
       this.buttonStates
     ) {
       const gamepad = inputSource.gamepad;
@@ -245,7 +209,12 @@ class Thumb {
               -this.buttonStates[key].yAxis,
               this.buttonStates[key].xAxis
             );
-            this.ui.updateElement("body", `x: ${gamepad.axes[xAxisIndex].toFixed(2)} \n y: ${gamepad.axes[yAxisIndex].toFixed(2)}` );
+            this.debugui.updateElement(
+              "body",
+              `x: ${gamepad.axes[xAxisIndex].toFixed(2)} \n y: ${gamepad.axes[
+                yAxisIndex
+              ].toFixed(2)}`
+            );
           } else {
             this.buttonStates[key] = gamepad.buttons[buttonIndex].value;
           }
@@ -263,14 +232,11 @@ class Thumb {
 
     function vrStatus(available) {
       if (available) {
-        console.log("available");
         function onConnected(event) {
           const info = {};
 
           fetchProfile(event.data, DEFAULT_PROFILES_PATH, DEFAULT_PROFILE).then(
             ({ profile, assetPath }) => {
-              console.log(JSON.stringify(profile));
-
               info.name = profile.profileId;
               info.targetRayMode = event.data.targetRayMode;
 
@@ -283,8 +249,6 @@ class Thumb {
               });
 
               self.createButtonStates(info.right);
-
-              console.log(JSON.stringify(info));
             }
           );
         }
@@ -317,7 +281,7 @@ class Thumb {
         ]);
 
         const line = new THREE.Line(geometry);
-        line.scale.z = 0;
+        line.scale.z = 10;
 
         self.controllers = {};
         self.controllers.right = self.buildController(0, line, modelFactory);
@@ -330,12 +294,12 @@ class Thumb {
     }
 
     function onSessionStart() {
-      self.ui.mesh.position.set(0, 1.5, 9);
-      self.camera.attach(self.ui.mesh);
+      self.debugui.mesh.position.set(0, 1.5, 9);
+      self.camera.attach(self.debugui.mesh);
     }
 
     function onSessionEnd() {
-      self.camera.remove(self.ui.mesh);
+      self.camera.remove(self.debugui.mesh);
     }
 
     const btn = new VRBTN(this.renderer, {
@@ -378,25 +342,6 @@ class Thumb {
     //Store original dolly rotation
     const quaternion = this.dolly.quaternion.clone();
 
-    //**************** */
-
-    // if (this.joystick === undefined) {
-    //   //Get rotation for movement from the headset pose
-    //   this.dolly.quaternion.copy(
-    //     this.dummyCam.getWorldQuaternion(this.workingQuaternion)
-    //   );
-    //   this.dolly.getWorldDirection(dir);
-    //   dir.negate();
-    // } else {
-    //   this.dolly.getWorldDirection(dir);
-    //   if (this.dolly.userData.forward > 0) {
-    //     dir.negate();
-    //   } else {
-    //     dt = -dt;
-    //   }
-    // }
-
-
     if (this.joystick === undefined) {
       //Get rotation for movement from the headset pose
       this.dolly.quaternion.copy(
@@ -417,8 +362,6 @@ class Thumb {
       }
     }
 
-    //********************** */
-
     this.dolly.translateZ(-dt * speed);
     pos = this.dolly.getWorldPosition(this.origin);
 
@@ -427,8 +370,6 @@ class Thumb {
   }
 
   get selectPressed() {
-    // console.log(this.renderer.xr.getController(0).userData.selectPressed);
-    console.log(this.renderer.xr.getController(1).userData.selectPressed);
     return (
       this.controllers !== undefined &&
       (this.renderer.xr.getController(0).userData.selectPressed ||
@@ -439,14 +380,10 @@ class Thumb {
   render(timestamp, frame) {
     const dt = this.clock.getDelta();
 
-    // this.world.fixedStep();
-
     let moved = false;
 
     if (this.renderer.xr.isPresenting) {
-      // console.log(this.controllers[0].gamepad);
-      this.ui.update();
-      // this.ui.updateElement("body", String(JSON.stringify(this.controllers[0].gamepad)) );
+      this.debugui.update();
 
       if (this.selectPressed) {
         this.moveDolly(-dt);
@@ -458,9 +395,15 @@ class Thumb {
         this.updateGamepadState();
         this.elapsedTime = 0;
       }
-    }
 
-    //*********************
+      if (this.dolly.userData.forward !== undefined) {
+        if (this.dolly.userData.forward != 0) {
+          this.moveDolly(dt);
+          moved = true;
+        }
+        this.dolly.translateX(this.dolly.userData.turn * -dt);
+      }
+    }
 
     if (this.joystick !== undefined) {
       if (this.dolly.userData.forward !== undefined) {
@@ -471,16 +414,6 @@ class Thumb {
         this.dolly.rotateY(this.dolly.userData.turn * dt);
       }
     }
-
-    if (this.dolly.userData.forward !== undefined) {
-      if (this.dolly.userData.forward != 0) {
-        this.moveDolly(dt);
-        moved = true;
-      }
-      // this.dolly.translateX(this.dolly.userData.turn * -dt);
-    }
-
-    //*********************
 
     this.renderer.render(this.scene, this.camera);
   }
