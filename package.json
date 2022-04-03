@@ -13,13 +13,17 @@
     "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "ammo.js": "github:kripken/ammo.js",
     "cannon": "^0.6.2",
+    "dat.gui": "^0.7.9",
+    "datguivr": "github:xinaesthete/dat.guiVR#master",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
     "serve": "^13.0.2",
-    "three": "^0.138.3",
+    "three": "^0.127.0",
+    "three-css3drenderer": "^1.0.1",
     "three-mesh-ui": "^6.3.2",
     "three-to-cannon": "^4.0.2",
+    "vr-ui": "^0.0.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

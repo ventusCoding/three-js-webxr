@@ -14,13 +14,508 @@ import {
   MotionController,
 } from "@webxr-input-profiles/motion-controllers";
 
+import * as dat from "three/examples/jsm/libs/dat.gui.module";
+
 const DEFAULT_PROFILES_PATH =
   "https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles";
 const DEFAULT_PROFILE = "generic-trigger";
 
+const array = [
+  {
+    name: "Architecture",
+    childs: [
+      {
+        name: "Architecture Child 1",
+      },
+      {
+        name: "Architecture Child 2",
+      },
+      {
+        name: "Architecture Child 3",
+      },
+      {
+        name: "Architecture Child 4",
+      },
+      {
+        name: "Architecture Child 5",
+      },
+      {
+        name: "Architecture Child 6",
+      },
+      {
+        name: "Architecture Child 7",
+      },
+      // {
+      //   name: "Architecture Child 8",
+      // },
+      // {
+      //   name: "Architecture Child 9",
+      // },
+      // {
+      //   name: "Architecture Child 10",
+      // },
+      // {
+      //   name: "Architecture Child 11",
+      // },
+      // {
+      //   name: "Architecture Child 12",
+      // },
+      // {
+      //   name: "Architecture Child 13",
+      // },
+      // {
+      //   name: "Architecture Child 14",
+      // },
+      // {
+      //   name: "Architecture Child 15",
+      // },
+      // {
+      //   name: "Architecture Child 16",
+      // },
+      // {
+      //   name: "Architecture Child 17",
+      // },
+      // {
+      //   name: "Architecture Child 18",
+      // },
+      // {
+      //   name: "Architecture Child 19",
+      // },
+      // {
+      //   name: "Architecture Child 20",
+      // },
+      // {
+      //   name: "Architecture Child 21",
+      // },
+      // {
+      //   name: "Architecture Child 22",
+      // },
+      // {
+      //   name: "Architecture Child 23",
+      // },
+      // {
+      //   name: "Architecture Child 24",
+      // },
+      // {
+      //   name: "Architecture Child 25",
+      // },
+      // {
+      //   name: "Architecture Child 26",
+      // },
+      // {
+      //   name: "Architecture Child 27",
+      // },
+      // {
+      //   name: "Architecture Child 28",
+      // },
+      // {
+      //   name: "Architecture Child 29",
+      // },
+      // {
+      //   name: "Architecture Child 30",
+      // },
+      // {
+      //   name: "Architecture Child 31",
+      // },
+      // {
+      //   name: "Architecture Child 32",
+      // },
+      // {
+      //   name: "Architecture Child 33",
+      // },
+      // {
+      //   name: "Architecture Child 34",
+      // },
+      // {
+      //   name: "Architecture Child 35",
+      // },
+      // {
+      //   name: "Architecture Child 36",
+      // },
+      // {
+      //   name: "Architecture Child 37",
+      // },
+      // {
+      //   name: "Architecture Child 38",
+      // },
+      // {
+      //   name: "Architecture Child 39",
+      // },
+      // {
+      //   name: "Architecture Child 40",
+      // },
+    ],
+  },
+  {
+    name: "Structure",
+    childs: [
+      {
+        name: "Structure Child 1",
+      },
+      {
+        name: "Structure Child 2",
+      },
+      {
+        name: "Structure Child 3",
+      },
+    ],
+  },
+  {
+    name: "Fluide",
+    childs: [
+      {
+        name: "Fluide Child 1",
+      },
+      {
+        name: "Fluide Child 2",
+      },
+      {
+        name: "Fluide Child 3",
+      },
+    ],
+  },
+  {
+    name: "A1",
+    childs: [
+      {
+        name: "A1 Child 1",
+      },
+      {
+        name: "A1 Child 2",
+      },
+      {
+        name: "A1 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A2",
+    childs: [
+      {
+        name: "A2 Child 1",
+      },
+      {
+        name: "A2 Child 2",
+      },
+      {
+        name: "A2 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A3",
+    childs: [
+      {
+        name: "A3 Child 1",
+      },
+      {
+        name: "A3 Child 2",
+      },
+      {
+        name: "A3 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A4",
+    childs: [
+      {
+        name: "A4 Child 1",
+      },
+      {
+        name: "A4 Child 2",
+      },
+      {
+        name: "A4 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A5",
+    childs: [
+      {
+        name: "A5 Child 1",
+      },
+      {
+        name: "A5 Child 2",
+      },
+      {
+        name: "A5 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A6",
+    childs: [
+      {
+        name: "A6 Child 1",
+      },
+      {
+        name: "A6 Child 2",
+      },
+      {
+        name: "A6 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A7",
+    childs: [
+      {
+        name: "A7 Child 1",
+      },
+      {
+        name: "A7 Child 2",
+      },
+      {
+        name: "A7 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A8",
+    childs: [
+      {
+        name: "A8 Child 1",
+      },
+      {
+        name: "A8 Child 2",
+      },
+      {
+        name: "A8 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A9",
+    childs: [
+      {
+        name: "A9 Child 1",
+      },
+      {
+        name: "A9 Child 2",
+      },
+      {
+        name: "A9 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A10",
+    childs: [
+      {
+        name: "A10 Child 1",
+      },
+      {
+        name: "A10 Child 2",
+      },
+      {
+        name: "A10 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A11",
+    childs: [
+      {
+        name: "A11 Child 1",
+      },
+      {
+        name: "A11 Child 2",
+      },
+      {
+        name: "A11 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A12",
+    childs: [
+      {
+        name: "A12 Child 1",
+      },
+      {
+        name: "A12 Child 2",
+      },
+      {
+        name: "A12 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A13",
+    childs: [
+      {
+        name: "A13 Child 1",
+      },
+      {
+        name: "A13 Child 2",
+      },
+      {
+        name: "A13 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A14",
+    childs: [
+      {
+        name: "A14 Child 1",
+      },
+      {
+        name: "A14 Child 2",
+      },
+      {
+        name: "A14 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A15",
+    childs: [
+      {
+        name: "A15 Child 1",
+      },
+      {
+        name: "A15 Child 2",
+      },
+      {
+        name: "A15 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A16",
+    childs: [
+      {
+        name: "A16 Child 1",
+      },
+      {
+        name: "A16 Child 2",
+      },
+      {
+        name: "A16 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A17",
+    childs: [
+      {
+        name: "A17 Child 1",
+      },
+      {
+        name: "A17 Child 2",
+      },
+      {
+        name: "A17 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A18",
+    childs: [
+      {
+        name: "A18 Child 1",
+      },
+      {
+        name: "A18 Child 2",
+      },
+      {
+        name: "A18 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A19",
+    childs: [
+      {
+        name: "A19 Child 1",
+      },
+      {
+        name: "A19 Child 2",
+      },
+      {
+        name: "A19 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A20",
+    childs: [
+      {
+        name: "A20 Child 1",
+      },
+      {
+        name: "A20 Child 2",
+      },
+      {
+        name: "A20 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A21",
+    childs: [
+      {
+        name: "A21 Child 1",
+      },
+      {
+        name: "A21 Child 2",
+      },
+      {
+        name: "A21 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A22",
+    childs: [
+      {
+        name: "A22 Child 1",
+      },
+      {
+        name: "A22 Child 2",
+      },
+      {
+        name: "A22 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A23",
+    childs: [
+      {
+        name: "A23 Child 1",
+      },
+      {
+        name: "A23 Child 2",
+      },
+      {
+        name: "A23 Child 3",
+      },
+    ],
+  },
+  {
+    name: "A24",
+    childs: [
+      {
+        name: "A24 Child 1",
+      },
+      {
+        name: "A24 Child 2",
+      },
+      {
+        name: "A24 Child 3",
+      },
+    ],
+  },
+];
+
 class Thumb {
   constructor(app) {
-    const container = document.createElement("div");
+    const container = document.createElement("a-scene");
+    // container.setAttribute('vr-mode-ui',"enabled: false")
     app.appendChild(container);
 
     this.camera = new THREE.PerspectiveCamera(
@@ -64,7 +559,8 @@ class Thumb {
     this.setupXR();
     //TODO: RAJA3 HEDHOM
     this.initScene();
-    this.createDebugUI();
+    // this.createDebugUI();
+    this.createTestUI();
 
     const self = this;
   }
@@ -74,6 +570,309 @@ class Thumb {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
+
+  //*********************** TODO: START ***********************/
+  /* 
+    1) create n elements in right and left ✅
+    2) update the left (parent) elements with array values ✅
+    3) change the right (child) elements with array values depends on the left (parent) elements ✅
+    4) create pagination in the right and left elements ❌
+  */
+
+  createContentUI() {
+    let name = "parent";
+    let counter = 1;
+
+    const self = this;
+
+    const content = {};
+
+    content.line = "";
+
+    for (let i = 0; i < 14; i++) {
+      content[`${name}${counter}Btn`] = "";
+      content[`${name}${counter}Txt`] = ``;
+
+      counter++;
+
+      if (i === 6) {
+        name = "child";
+        counter = 1;
+      }
+    }
+
+    return content;
+  }
+
+  createConfigUI() {
+    const renderer = this.renderer;
+
+    const config = {
+      panelSize: {
+        width: 1,
+        height: 1,
+      },
+      width: 512,
+      height: 512,
+      opacity: 0.7,
+    };
+
+    config.line = {
+      position: { top: 20, left: config.width / 2 },
+      width: 1,
+      height: config.height - 40,
+      backgroundColor: "#fff",
+    };
+
+    let positionObj = { top: 10, left: 0 };
+    let positionTxt = { top: positionObj.top + 9, left: 40 };
+
+    let name = "parent";
+    let counter = 1;
+
+    for (let i = 0; i < 14; i++) {
+      config[`${name}${counter}Btn`] = {
+        type: "button",
+        position: { ...positionObj },
+        width: 64,
+        height: 64,
+        fontColor: "#46ff37",
+        hover: "#b3d9b0",
+        current: "",
+        selected:false,
+        objects: {},
+        onSelect: () => {},
+      };
+
+      config[`${name}${counter}Txt`] = {
+        type: "text",
+        position: { ...positionTxt },
+        width: 200,
+        fontSize: 20,
+        height: 64,
+        hover: "#fff",
+        fontColor: "#fff",
+      };
+
+      positionObj.top += 64;
+      positionTxt.top = positionObj.top + 9;
+
+      counter++;
+
+      if (i === 6) {
+        name = "child";
+        counter = 1;
+        positionObj = { top: 10, left: config.width / 2 + 20 };
+        positionTxt = {
+          top: positionObj.top + 9,
+          left: config.width / 2 + 60,
+        };
+      }
+    }
+
+    config["renderer"] = renderer;
+
+    return config;
+  }
+
+  updateChildToggleBtn(conf, childTxt, parentTxt) {
+    let obj = this.testUI.config[conf].objects;
+    const checked = this.testUI.config[conf].objects[childTxt];
+
+    if (checked) {
+      this.testUI.updateConfig(conf, "fontColor", "#46ff37");
+      this.testUI.updateConfig(conf, "hover", "#b3d9b0");
+      console.log(childTxt, "disable filter");
+    } else {
+      this.testUI.updateConfig(conf, "fontColor", "#ff3737fc");
+      this.testUI.updateConfig(conf, "hover", "#ff3737a6");
+
+      console.log(childTxt, "enable filter");
+
+      // this.testUI.updateConfig(parentTxt,"fontColor", "#000000"); //TODO:HERE
+    }
+
+    let checkAll = true;
+
+    for (var property in this.testUI.config) {
+      if (property.substring(0, 5).localeCompare("child") === 0) {
+        if (this.testUI.config[property].fontColor === "#ff3737fc") {
+          checkAll = false;
+          break;
+        }
+      }
+    }
+
+    console.log(checkAll);
+
+    if (!checkAll) {
+      this.testUI.updateConfig(parentTxt, "selected", true);
+      this.testUI.updateConfig(parentTxt, "fontColor", "#f09724");
+      this.testUI.updateConfig(parentTxt, "hover", "#ffc478");
+    } else {
+      this.testUI.updateConfig(parentTxt, "selected", false);
+      this.testUI.updateConfig(parentTxt, "fontColor", "#ff3737fc");
+      this.testUI.updateConfig(parentTxt, "hover", "#ff3737a6");
+    }
+
+    obj[childTxt] = !obj[childTxt];
+    this.testUI.updateConfig(conf, "objects", obj);
+  }
+
+  updateParentToggleBtn(conf, array) {
+    let obj = this.testUI.config[conf].objects;
+    const current = this.testUI.config[conf].current;
+
+    const checked = obj[current];
+
+    obj[current] = !checked;
+
+    console.log(conf);
+
+    this.testUI.updateConfig(conf, "objects", obj);
+
+    let childsSize = 8;
+
+    if (array.length < 8) {
+      childsSize = array.length;
+    }
+
+    if (checked) {
+      this.testUI.updateConfig(conf, "fontColor", "#46ff37");
+      this.testUI.updateConfig(conf, "hover", "#b3d9b0");
+
+      for (let i = 0; i < childsSize; i++) {
+        this.testUI.updateElement(`child${i + 1}Btn`, "");
+        this.testUI.updateElement(`child${i + 1}Txt`, "");
+      }
+    } else {
+      for (let i = 0; i < 6; i++) {
+        // console.log(conf);
+        if (this.testUI.config[`parent${i + 1}Btn`].selected === false) {
+          this.testUI.updateConfig(`parent${i + 1}Btn`, "fontColor", "#46ff37");
+          this.testUI.updateConfig(`parent${i + 1}Btn`, "hover", "#b3d9b0");
+        }
+
+        let newObj = this.testUI.config[`parent${i + 1}Btn`].objects;
+
+        for (const property in newObj) {
+          if (property.localeCompare(current)) {
+            newObj[property] = false;
+          }
+        }
+
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "objects", newObj);
+      }
+
+      this.testUI.updateConfig(conf, "objects", obj);
+
+      this.testUI.updateConfig(conf, "fontColor", "#ff3737fc");
+      this.testUI.updateConfig(conf, "hover", "#ff3737a6");
+
+      let childObj = {};
+      let refObj = {};
+
+      for (let i = 0; i < childsSize; i++) {
+        this.testUI.updateElement(
+          `child${i + 1}Btn`,
+          "<path>M 50 15 Z M 31 49 A 1 1 0 0 0 31 17 A 1 1 0 0 0 31 49</path>"
+        );
+        this.testUI.updateElement(`child${i + 1}Txt`, array[i].name);
+        this.testUI.updateConfig(`child${i + 1}Btn`, "onSelect", () =>
+          this.updateChildToggleBtn(`child${i + 1}Btn`, array[i].name, conf)
+        );
+        childObj = this.testUI.config[`child${i + 1}Btn`].objects;
+
+        if (!childObj[array[i].name]) {
+          refObj[array[i].name] = false;
+
+          Object.assign(childObj, refObj);
+
+          this.testUI.updateConfig(`child${i + 1}Btn`, "objects", childObj);
+        }
+
+        let checked =
+          this.testUI.config[`child${i + 1}Btn`].objects[array[i].name];
+        if (!checked) {
+          this.testUI.updateConfig(`child${i + 1}Btn`, "fontColor", "#46ff37");
+          this.testUI.updateConfig(`child${i + 1}Btn`, "hover", "#b3d9b0");
+        } else {
+          this.testUI.updateConfig(
+            `child${i + 1}Btn`,
+            "fontColor",
+            "#ff3737fc"
+          );
+          this.testUI.updateConfig(`child${i + 1}Btn`, "hover", "#ff3737a6");
+        }
+      }
+    }
+
+    if(this.testUI.config[conf].selected === true) {
+      console.log(this.testUI.config[conf].selected);
+      this.testUI.updateConfig(conf, "fontColor", "#f09724");
+      this.testUI.updateConfig(conf, "hover", "#ffc478");
+    }
+  }
+
+  updateParentUI(array) {
+    let size = 6;
+
+    for (let i = 0; i < size; i++) {
+      let obj = this.testUI.config[`parent${i + 1}Btn`].objects;
+
+      if (!obj[array[i].name]) {
+        obj[array[i].name] = false;
+
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "objects", obj);
+      }
+
+      let checked =
+        this.testUI.config[`parent${i + 1}Btn`].objects[array[i].name];
+
+      if (!checked) {
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "fontColor", "#46ff37");
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "hover", "#b3d9b0");
+      } else {
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "fontColor", "#ff3737fc");
+        this.testUI.updateConfig(`parent${i + 1}Btn`, "hover", "#ff3737a6");
+      }
+
+      this.testUI.updateConfig(`parent${i + 1}Btn`, "current", array[i].name);
+
+      this.testUI.updateConfig(`parent${i + 1}Btn`, "onSelect", () =>
+        this.updateParentToggleBtn(`parent${i + 1}Btn`, array[i].childs)
+      );
+      this.testUI.updateElement(
+        `parent${i + 1}Btn`,
+        "<path>M 50 15 Z M 31 49 A 1 1 0 0 0 31 17 A 1 1 0 0 0 31 49</path>"
+      );
+      this.testUI.updateElement(`parent${i + 1}Txt`, array[i].name);
+    }
+
+    if (array.length < 6) {
+      for (let i = array.length; i < 8; i++) {
+        this.testUI.updateElement(`parent${i + 1}Btn`, "");
+        this.testUI.updateElement(`parent${i + 1}Txt`, "");
+      }
+    }
+  }
+
+  createTestUI() {
+    const config = this.createConfigUI();
+    const content = this.createContentUI();
+
+    this.testUI = new CanvasUI(content, config);
+
+    console.log(this.testUI.config);
+
+    this.updateParentUI(array);
+
+    this.testUI.mesh.position.set(0, 1.5, -1.5);
+
+    this.dolly.add(this.testUI.mesh);
+  }
+
+  //*********************** TODO: END ***********************/
 
   createDebugUI() {
     this.debugui = new CanvasUI();
@@ -148,7 +947,6 @@ class Thumb {
   //           }
   //       });
 
-
   //     },
   //     // called while loading is progressing
   //     function (xhr) {
@@ -174,19 +972,15 @@ class Thumb {
       // called when the resource is loaded
       function (fbx) {
         fbx.traverse((child) => {
-          
-
-          
           if (child.isMesh) {
             const string = child.name.toLowerCase();
             const substring = "floor";
-            
-            if(string.includes(substring.toLowerCase())){
-              child.visible = false
+
+            if (string.includes(substring.toLowerCase())) {
+              child.visible = false;
               console.log(string);
             }
           }
-
         });
         // fbx.scale.set(self.dolly.scale.x * 0.1,self.dolly.scale.y * 0.1,self.dolly.scale.z * 0.1);
 
@@ -231,7 +1025,7 @@ class Thumb {
         this.dolly.userData.forward = forward;
         this.dolly.userData.turn = -turn;
       } catch (e) {
-        this.debugui.updateElement("body", `error: ${e}`);
+        // this.debugui.updateElement("body", `error: ${e}`);
       }
     }
   }
@@ -279,12 +1073,12 @@ class Thumb {
               -this.buttonStates[key].yAxis,
               this.buttonStates[key].xAxis
             );
-            this.debugui.updateElement(
-              "body",
-              `x: ${gamepad.axes[xAxisIndex].toFixed(2)} \n y: ${gamepad.axes[
-                yAxisIndex
-              ].toFixed(2)}`
-            );
+            // this.debugui.updateElement(
+            //   "body",
+            //   `x: ${gamepad.axes[xAxisIndex].toFixed(2)} \n y: ${gamepad.axes[
+            //     yAxisIndex
+            //   ].toFixed(2)}`
+            // );
           } else {
             this.buttonStates[key] = gamepad.buttons[buttonIndex].value;
           }
@@ -364,12 +1158,12 @@ class Thumb {
     }
 
     function onSessionStart() {
-      self.debugui.mesh.position.set(0, 1.5, 9);
-      self.camera.attach(self.debugui.mesh);
+      // self.debugui.mesh.position.set(0, 1.5, 9);
+      // self.camera.attach(self.debugui.mesh);
     }
 
     function onSessionEnd() {
-      self.camera.remove(self.debugui.mesh);
+      // self.camera.remove(self.debugui.mesh);
     }
 
     const btn = new VRBTN(this.renderer, {
@@ -453,10 +1247,11 @@ class Thumb {
     let moved = false;
 
     if (this.renderer.xr.isPresenting) {
-      this.debugui.update();
+      this.testUI.update();
+      // this.debugui.update();
 
       if (this.selectPressed) {
-        this.moveDolly(-dt);
+        // this.moveDolly(-dt);
       }
 
       if (this.elapsedTime === undefined) this.elapsedTime = 0;
